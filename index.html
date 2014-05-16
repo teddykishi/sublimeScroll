@@ -113,14 +113,18 @@
                     translate2d : has2d,
                     topLeft : hasTopLeft
                 };
-            })()
+            })();
+
+            var transitionEnd = 'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend';
 
 
             var $container = $("#container"),
             $nextSlide = $(".next"),
             $prevSlide = $(".prev"),
+            $nav  = $("#nav a"),
+            content = ".content",
             items = 1,
-            position = x = 0,
+            prevPosition = position = x = 0,
             itemsLoaded = ["file0"],
             links = ["file0","file1","file2","file3"],
             currentItem = links[position];
@@ -144,6 +148,7 @@
 
             function prev(){
                 if(links[position-1]){
+                    prevPosition = position;
                     position--;
                     currentItem = links[position];
                     x = -(position * 100) + "%";
@@ -159,6 +164,7 @@
 
             function next(){
                 if( links[position+1]){
+                    prevPosition = position;
                     position++;
                     currentItem = links[position];
                     x = -(position * 100) + "%";
@@ -178,9 +184,21 @@
                 }
             }
 
+            function jump(x, divide){
+                $container.removeClass("transition");
+                if(moveType.translate3d){
+                    x = divide ? parseInt(x) / items : parseInt(x);
+                    $container.css(prefix.css+"transform", "translate3d("+x+"%, 0,0)");
+                } else if (moveType.translate2d){
+                    x = divide ? parseInt(x) / items : parseInt(x);
+                    $container.css(prefix.css+"transform", "translate("+x+"%, 0)");
+                } else {
+                    $container.css({left: x+"%"});
+                }
+            }
             function move(x){
+                $container.addClass("transition");
                 //$container.css({left: x+"%"});
-                
                 if(moveType.translate3d){
                     x = parseInt(x) / items;
                     $container.css(prefix.css+"transform", "translate3d("+x+"%, 0,0)");
@@ -190,10 +208,14 @@
                 } else {
                     $container.css({left: x+"%"});
                 }
+
+                $container.one(transitionEnd, function(e) {
+                    $container.removeClass("transition");
+                });
                 
             }
 
-            $("#nav a").click(function(e){
+            $nav.click(function(e){
                 var link = $(this).attr("href");
                 if( (itemsLoaded.indexOf(link) > -1) ){
                     console.log("already loaded")
@@ -203,7 +225,7 @@
                 } else {
                     console.log("load slide")
                     loadItem(link, function(){
-                       slideTo( ($(".content").length -1) );
+                       slideTo( $(".content").length -1 );
                     });
                 }
                 return false;
@@ -216,20 +238,38 @@
                         $container.append( $(this).html() );
                         itemsLoaded.push(link)
                         items++;
-                        $container.css("width", (items * 100) + "%");
-                        $(".content").width( (100 / items) + "%");
-                        if(callback && typeof callback == "function") callback();
+
+                        var prevWidth = parseInt($container[0].style.width);
+                        var divide = 100 / items;
+                        var newWidth = (items * 100);
+
+                        $container.width( newWidth + "%");
+                        $(content).width( divide + "%");
+                        /*
+                        position = num;
+                        currentItem = links[position] || 0;
+                        x = -(position * 100) + "%";*/
+                        var jumpTo = -( (position-1) * divide);//-(parseInt($(content).eq(prevPosition)[0].style.width) || 0) * position; //- ((position * divide) + divide);
+
+                        jump( jumpTo, false );
+
+                        setTimeout(function(){
+                            if(callback && typeof callback == "function") callback();
+                        }, 100);
+                        
                     })
                 } else {
-                    if(callback && typeof callback == "function") callback();
+                    setTimeout(function(){
+                        if(callback && typeof callback == "function") callback();
+                    }, 100);
                 }
             }
-
+            /*
             function scrollTo(position){
                 $container.stop().animate({
                     left : position
                 }, 500)
-            }
+            }*/
         });
     </script>
 

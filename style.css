@@ -18,11 +18,13 @@ html, body {
 	left: 0;
 	z-index: 0;
 
-	-webkit-transition: -webkit-transform .7s, left .7s;
-	   -moz-transition: -moz-transform: .7s, left .7s;
-	    -ms-transition:  -ms-transform: .7s, left .7s;
-	     -o-transition:   -o-transform: .7s, left .7s;
-	        transition:      transform: .7s, left .7s;
+}
+.transition {
+    -webkit-transition: -webkit-transform .7s, left .7s;
+       -moz-transition: -moz-transform: .7s, left .7s;
+        -ms-transition:  -ms-transform: .7s, left .7s;
+         -o-transition:   -o-transform: .7s, left .7s;
+            transition:      transform: .7s, left .7s;
 }
 
 #container.default {
